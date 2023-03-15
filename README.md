@@ -21,7 +21,7 @@ source <(curl -L https://github.com/Saya47/install-script-english/raw/main/insta
 2. single vision
 
 ```shell
-source <(curl -L https://github.com/trojanpanel/install-script/raw/main/install_script_standalone.sh)
+source <(curl -L https://github.com/Saya47/install-script-english/raw/main/install_script_standalone.sh)
 ```
 
 3. [install old version](./archive)
