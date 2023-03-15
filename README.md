@@ -15,7 +15,7 @@ memory requirements: ≥1G
 1. Online version (recommended)
 
 ```shell
-source <(curl -L https://github.com/trojanpanel/install-script/raw/main/install_script.sh)
+source <(curl -L https://github.com/Saya47/install-script-english/raw/main/install_script.sh)
 ```
 
 2. single vision
