@@ -19,7 +19,7 @@ init_var() {
   # Docker
   DOCKER_MIRROR='"https://registry.docker-cn.com","https://hub-mirror.c.163.com","https://docker.mirrors.ustc.edu.cn"'
 
-  # 项目目录
+  # project directory
   TP_DATA="/tpdata/"
 
   STATIC_HTML="https://github.com/trojanpanel/install-script/releases/download/v1.0.0/html.tar.gz"
@@ -104,7 +104,7 @@ echo_content() {
 }
 
 mkdir_tools() {
-  # 项目目录
+  # project directory
   mkdir -p ${TP_DATA}
 
   # Caddy
@@ -152,7 +152,7 @@ check_sys() {
   fi
 
   if [[ -z "${package_manager}" ]]; then
-    echo_content red "暂不支持该系统"
+    echo_content red "The system is not currently supported"
     exit 0
   fi
 
@@ -165,7 +165,7 @@ check_sys() {
   fi
 
   if [[ -z "${release}" ]]; then
-    echo_content red "仅支持CentOS 7+/Ubuntu 18+/Debian 10+系统"
+    echo_content red "only supportCentOS 7+/Ubuntu 18+/Debian 10+system"
     exit 0
   fi
 
@@ -174,7 +174,7 @@ check_sys() {
   fi
 
   if [[ -z "${get_arch}" ]]; then
-    echo_content red "仅支持amd64/arm64/arm/s390x处理器架构"
+    echo_content red "only supportamd64/arm64/arm/s390xprocessor architecture"
     exit 0
   fi
 }
@@ -191,17 +191,17 @@ depend_install() {
     systemd
 }
 
-# 安装Docker
+# InstallDocker
 install_docker() {
   if [[ ! $(docker -v 2>/dev/null) ]]; then
-    echo_content green "---> 安装Docker"
+    echo_content green "---> InstallDocker"
 
-    # 关闭防火墙
+    # turn off firewall
     if [[ "$(firewall-cmd --state 2>/dev/null)" == "running" ]]; then
       systemctl stop firewalld.service && systemctl disable firewalld.service
     fi
 
-    # 时区
+    # Time zone
     timedatectl set-timezone Asia/Shanghai
 
     can_connect www.google.com
@@ -209,7 +209,7 @@ install_docker() {
 
     if [[ ${can_google} == 0 ]]; then
       sh <(curl -sL https://get.docker.com) --mirror Aliyun
-      # 设置Docker国内源
+      # set upDockerDomestic source
       mkdir -p /etc/docker &&
         cat >/etc/docker/daemon.json <<EOF
 {
@@ -229,43 +229,43 @@ EOF
       systemctl restart docker
 
     if [[ $(docker -v 2>/dev/null) ]]; then
-      echo_content skyBlue "---> Docker安装完成"
+      echo_content skyBlue "---> DockerThe installation is complete"
     else
-      echo_content red "---> Docker安装失败"
+      echo_content red "---> Dockerinstallation failed"
       exit 0
     fi
   else
-    echo_content skyBlue "---> 你已经安装了Docker"
+    echo_content skyBlue "---> you have installedDocker"
   fi
 }
 
-# 安装Caddy TLS
+# InstallCaddy TLS
 install_caddy_tls() {
   if [[ -z $(docker ps -a -q -f "name=^trojan-panel-caddy$") ]]; then
-    echo_content green "---> 安装Caddy TLS"
+    echo_content green "---> InstallCaddy TLS"
 
     wget --no-check-certificate -O ${CADDY_DATA}html.tar.gz ${STATIC_HTML} &&
       tar -zxvf ${CADDY_DATA}html.tar.gz -C ${CADDY_SRV}
 
-    read -r -p "请输入Caddy的端口(默认:80): " caddy_port
+    read -r -p "please enterCaddyport(default:80): " caddy_port
     [[ -z "${caddy_port}" ]] && caddy_port=80
-    read -r -p "请输入Caddy的转发端口(默认:8863): " caddy_remote_port
+    read -r -p "please enterCaddyForwarding port of(default:8863): " caddy_remote_port
     [[ -z "${caddy_remote_port}" ]] && caddy_remote_port=8863
 
-    echo_content yellow "提示：请确认域名已经解析到本机 否则可能安装失败"
-    while read -r -p "请输入你的域名(必填): " domain; do
+    echo_content yellow "Tip: Please confirm that the domain name has been resolved to this machine Otherwise the installation may fail"
+    while read -r -p "Please enter your domain name(required): " domain; do
       if [[ -z "${domain}" ]]; then
-        echo_content red "域名不能为空"
+        echo_content red "Domain name cannot be empty"
       else
         break
       fi
     done
 
-    read -r -p "请输入你的邮箱(可选): " your_email
+    read -r -p "Please enter your email(optional): " your_email
 
-    while read -r -p "请选择设置证书的方式?(1/自动申请和续签证书 2/手动设置证书路径 默认:1/自动申请和续签证书): " ssl_option; do
+    while read -r -p "Please choose how to set up the certificate?(1/Apply for and renew certificates automatically 2/Manually set the certification path default:1/Apply for and renew certificates automatically): " ssl_option; do
       if [[ -z ${ssl_option} || ${ssl_option} == 1 ]]; then
-        while read -r -p "请选择申请证书的方式(1/acme 2/zerossl 默认:1/acme): " ssl_module_type; do
+        while read -r -p "Please choose the way to apply for a certificate(1/acme 2/zerossl default:1/acme): " ssl_module_type; do
           if [[ -z "${ssl_module_type}" || ${ssl_module_type} == 1 ]]; then
             ssl_module="acme"
             CADDY_CERT_DIR="/tpdata/caddy/cert/certificates/acme-v02.api.letsencrypt.org-directory/"
@@ -275,7 +275,7 @@ install_caddy_tls() {
             CADDY_CERT_DIR="/tpdata/caddy/cert/certificates/acme.zerossl.com-v2-dv90/"
             break
           else
-            echo_content red "不可以输入除1和2之外的其他字符"
+            echo_content red "Cannot enter except1and2characters other than"
           fi
         done
 
@@ -404,12 +404,12 @@ install_caddy_tls() {
 EOF
         break
       elif [[ ${ssl_option} == 2 ]]; then
-        while read -r -p "请输入证书的.crt文件路径(必填): " crt_path; do
+        while read -r -p "Please enter the certificate's.crtfile path(required): " crt_path; do
           if [[ -z "${crt_path}" ]]; then
-            echo_content red "路径不能为空"
+            echo_content red "path cannot be empty"
           else
             if [[ ! -f "${crt_path}" ]]; then
-              echo_content red "证书的.crt文件路径不存在"
+              echo_content red "certificate.crtfile path does not exist"
             else
               cp "${crt_path}" "${CADDY_CERT}${domain}.crt"
               break
@@ -417,12 +417,12 @@ EOF
           fi
         done
 
-        while read -r -p "请输入证书的.key文件路径(必填): " key_path; do
+        while read -r -p "Please enter the certificate's.keyfile path(required): " key_path; do
           if [[ -z "${key_path}" ]]; then
-            echo_content red "路径不能为空"
+            echo_content red "path cannot be empty"
           else
             if [[ ! -f "${key_path}" ]]; then
-              echo_content red "证书的.key文件路径不存在"
+              echo_content red "certificate.keyfile path does not exist"
             else
               cp "${key_path}" "${CADDY_CERT}${domain}.key"
               break
@@ -561,7 +561,7 @@ EOF
 EOF
         break
       else
-        echo_content red "不可以输入除1和2之外的其他字符"
+        echo_content red "Cannot enter except1and2characters other than"
       fi
     done
 
@@ -582,27 +582,27 @@ EOF
       cat >${DOMAIN_FILE} <<EOF
 ${domain}
 EOF
-      echo_content skyBlue "---> Caddy安装完成"
+      echo_content skyBlue "---> CaddyThe installation is complete"
     else
-      echo_content red "---> Caddy安装失败或运行异常,请尝试修复或卸载重装"
+      echo_content red "---> CaddyFailed to install or run abnormally,Please try to repair or uninstall and reinstall"
       exit 0
     fi
   else
     domain=$(cat "${DOMAIN_FILE}")
-    echo_content skyBlue "---> 你已经安装了Caddy"
+    echo_content skyBlue "---> you have installedCaddy"
   fi
 }
 
 # TrojanGFW+Caddy+Web+TLS+Websocket
 install_trojan_gfw_standalone() {
   if [[ -z $(docker ps -a -q -f "name=^trojan-panel-trojanGFW-standalone$") ]]; then
-    echo_content green "---> 安装TrojanGFW+Caddy+Web+TLS+Websocket"
+    echo_content green "---> InstallTrojanGFW+Caddy+Web+TLS+Websocket"
 
-    read -r -p "请输入TrojanGFW的端口(默认:443): " trojanGFW_port
+    read -r -p "please enterTrojanGFWport(default:443): " trojanGFW_port
     [[ -n ${trojanGFW_port} ]] && trojanGFW_port=443
-    while read -r -p "请输入TrojanGFW的密码(必填): " trojan_pas; do
+    while read -r -p "please enterTrojanGFWpassword for(required): " trojan_pas; do
       if [[ -z "${trojan_pas}" ]]; then
-        echo_content red "密码不能为空"
+        echo_content red "password can not be blank"
       else
         break
       fi
@@ -669,78 +669,78 @@ EOF
         trojangfw/trojan
 
     if [[ -n $(docker ps -q -f "name=^trojan-panel-trojanGFW-standalone$" -f "status=running") ]]; then
-      echo_content skyBlue "---> TrojanGFW+Caddy+Web+TLS 安装完成"
+      echo_content skyBlue "---> TrojanGFW+Caddy+Web+TLS The installation is complete"
       echo_content red "\n=============================================================="
-      echo_content skyBlue "TrojanGFW+Caddy+Web+TLS 安装成功"
-      echo_content yellow "域名: ${domain}"
-      echo_content yellow "TrojanGFW的端口: ${trojanGFW_port}"
-      echo_content yellow "TrojanGFW的密码: ${trojan_pas}"
+      echo_content skyBlue "TrojanGFW+Caddy+Web+TLS Successful installation"
+      echo_content yellow "domain name: ${domain}"
+      echo_content yellow "TrojanGFWport: ${trojanGFW_port}"
+      echo_content yellow "TrojanGFWpassword for: ${trojan_pas}"
       echo_content red "\n=============================================================="
     else
-      echo_content red "---> TrojanGFW+Caddy+Web+TLS 安装失败或运行异常,请尝试修复或卸载重装"
+      echo_content red "---> TrojanGFW+Caddy+Web+TLS Failed to install or run abnormally,Please try to repair or uninstall and reinstall"
       exit 0
     fi
   else
-    echo_content skyBlue "---> 你已经安装了TrojanGFW+Caddy+Web+TLS"
+    echo_content skyBlue "---> you have installedTrojanGFW+Caddy+Web+TLS"
   fi
 }
 
 # TrojanGO+Caddy+Web+TLS+Websocket
 install_trojanGO_standalone() {
   if [[ -z $(docker ps -a -q -f "name=^trojan-panel-trojanGO-standalone$") ]]; then
-    echo_content green "---> 安装TrojanGO+Caddy+Web+TLS+Websocket"
+    echo_content green "---> InstallTrojanGO+Caddy+Web+TLS+Websocket"
 
-    read -r -p "请输入TrojanGO的端口(默认:443): " trojanGO_port
+    read -r -p "please enterTrojanGOport(default:443): " trojanGO_port
     [[ -z "${trojanGO_port}" ]] && trojanGO_port=443
-    while read -r -p "请输入TrojanGO的密码(必填): " trojan_pas; do
+    while read -r -p "please enterTrojanGOpassword for(required): " trojan_pas; do
       if [[ -z "${trojan_pas}" ]]; then
-        echo_content red "密码不能为空"
+        echo_content red "password can not be blank"
       else
         break
       fi
     done
 
-    while read -r -p "是否开启多路复用?(false/关闭 true/开启 默认:true/开启): " trojanGO_mux_enable; do
+    while read -r -p "Whether to enable multiplexing?(false/closure true/turn on default:true/turn on): " trojanGO_mux_enable; do
       if [[ -z "${trojanGO_mux_enable}" || ${trojanGO_mux_enable} == true ]]; then
         trojanGO_mux_enable=true
         break
       else
         if [[ ${trojanGO_mux_enable} != false ]]; then
-          echo_content red "不可以输入除false和true之外的其他字符"
+          echo_content red "Cannot enter exceptfalseandtruecharacters other than"
         else
           break
         fi
       fi
     done
 
-    while read -r -p "是否开启Websocket?(false/关闭 true/开启 默认:false/关闭): " trojanGO_websocket_enable; do
+    while read -r -p "whether to openWebsocket?(false/closure true/turn on default:false/closure): " trojanGO_websocket_enable; do
       if [[ -z "${trojanGO_websocket_enable}" || ${trojanGO_websocket_enable} == false ]]; then
         trojanGO_websocket_enable=false
         break
       else
         if [[ ${trojanGO_websocket_enable} != true ]]; then
-          echo_content red "不可以输入除false和true之外的其他字符"
+          echo_content red "Cannot enter exceptfalseandtruecharacters other than"
         else
-          read -r -p "请输入Websocket路径(默认:trojan-panel-websocket-path): " trojanGO_websocket_path
+          read -r -p "please enterWebsocketpath(default:trojan-panel-websocket-path): " trojanGO_websocket_path
           [[ -z "${trojanGO_websocket_path}" ]] && trojanGO_websocket_path="trojan-panel-websocket-path"
           break
         fi
       fi
     done
 
-    while read -r -p "是否启用Shadowsocks AEAD加密?(false/关闭 true/开启 默认:false/关闭): " trojanGO_shadowsocks_enable; do
+    while read -r -p "Whether to enableShadowsocks AEADencryption?(false/closure true/turn on default:false/closure): " trojanGO_shadowsocks_enable; do
       if [[ -z "${trojanGO_shadowsocks_enable}" || ${trojanGO_shadowsocks_enable} == false ]]; then
         trojanGO_shadowsocks_enable=false
         break
       else
         if [[ ${trojanGO_shadowsocks_enable} != true ]]; then
-          echo_content yellow "不可以输入除false和true之外的其他字符"
+          echo_content yellow "Cannot enter exceptfalseandtruecharacters other than"
         else
-          echo_content skyBlue "Shadowsocks AEAD加密方式如下:"
-          echo_content yellow "1. AES-128-GCM(默认)"
+          echo_content skyBlue "Shadowsocks AEADThe encryption method is as follows:"
+          echo_content yellow "1. AES-128-GCM(default)"
           echo_content yellow "2. CHACHA20-IETF-POLY1305"
           echo_content yellow "3. AES-256-GCM"
-          read -r -p "请输入Shadowsocks AEAD加密方式(默认:1): " select_method_type
+          read -r -p "please enterShadowsocks AEADEncryption(default:1): " select_method_type
           [[ -z "${select_method_type}" ]] && select_method_type=1
           case ${select_method_type} in
           1)
@@ -757,9 +757,9 @@ install_trojanGO_standalone() {
             ;;
           esac
 
-          while read -r -p "请输入Shadowsocks AEAD加密密码(必填): " trojanGO_shadowsocks_password; do
+          while read -r -p "please enterShadowsocks AEADencrypted password(required): " trojanGO_shadowsocks_password; do
             if [[ -z "${trojanGO_shadowsocks_password}" ]]; then
-              echo_content red "密码不能为空"
+              echo_content red "password can not be blank"
             else
               break
             fi
@@ -843,39 +843,39 @@ EOF
         p4gefau1t/trojan-go
 
     if [[ -n $(docker ps -q -f "name=^trojan-panel-trojanGO-standalone$" -f "status=running") ]]; then
-      echo_content skyBlue "---> TrojanGO+Caddy+Web+TLS+Websocket 安装完成"
+      echo_content skyBlue "---> TrojanGO+Caddy+Web+TLS+Websocket The installation is complete"
       echo_content red "\n=============================================================="
-      echo_content skyBlue "TrojanGO+Caddy+Web+TLS+Websocket 安装成功"
-      echo_content yellow "域名: ${domain}"
-      echo_content yellow "TrojanGO的端口: ${trojanGO_port}"
-      echo_content yellow "TrojanGO的密码: ${trojan_pas}"
-      echo_content yellow "TrojanGO私钥和证书目录: ${CADDY_CERT}"
+      echo_content skyBlue "TrojanGO+Caddy+Web+TLS+Websocket Successful installation"
+      echo_content yellow "domain name: ${domain}"
+      echo_content yellow "TrojanGOport: ${trojanGO_port}"
+      echo_content yellow "TrojanGOpassword for: ${trojan_pas}"
+      echo_content yellow "TrojanGOPrivate key and certificate directory: ${CADDY_CERT}"
       if [[ ${trojanGO_websocket_enable} == true ]]; then
-        echo_content yellow "Websocket路径: ${trojanGO_websocket_path}"
+        echo_content yellow "Websocketpath: ${trojanGO_websocket_path}"
       fi
       if [[ ${trojanGO_shadowsocks_enable} == true ]]; then
-        echo_content yellow "Shadowsocks AEAD加密方式: ${trojanGO_shadowsocks_method}"
-        echo_content yellow "Shadowsocks AEAD加密密码: ${trojanGO_shadowsocks_password}"
+        echo_content yellow "Shadowsocks AEADEncryption: ${trojanGO_shadowsocks_method}"
+        echo_content yellow "Shadowsocks AEADencrypted password: ${trojanGO_shadowsocks_password}"
       fi
       echo_content red "\n=============================================================="
     else
-      echo_content red "---> TrojanGO+Caddy+Web+TLS+Websocket 安装失败或运行异常,请尝试修复或卸载重装"
+      echo_content red "---> TrojanGO+Caddy+Web+TLS+Websocket Failed to install or run abnormally,Please try to repair or uninstall and reinstall"
       exit 0
     fi
   else
-    echo_content skyBlue "---> 你已经了安装了TrojanGO+Caddy+Web+TLS+Websocket"
+    echo_content skyBlue "---> you have installedTrojanGO+Caddy+Web+TLS+Websocket"
   fi
 }
 
-# 安装Hysteria
+# InstallHysteria
 install_hysteria_standalone() {
   if [[ -z $(docker ps -a -q -f "name=^trojan-panel-hysteria-standalone$") ]]; then
-    echo_content green "---> 安装Hysteria"
+    echo_content green "---> InstallHysteria"
 
-    echo_content skyBlue "Hysteria的模式如下:"
-    echo_content yellow "1. udp(默认)"
+    echo_content skyBlue "HysteriaThe schema is as follows:"
+    echo_content yellow "1. udp(default)"
     echo_content yellow "2. faketcp"
-    read -r -p "请输入Hysteria的模式(默认:1): " selectProtocolType
+    read -r -p "please enterHysteriamode(default:1): " selectProtocolType
     [[ -z "${selectProtocolType}" ]] && selectProtocolType=1
     case ${selectProtocolType} in
     1)
@@ -888,15 +888,15 @@ install_hysteria_standalone() {
       hysteria_protocol="udp"
       ;;
     esac
-    read -r -p "请输入Hysteria的端口(默认:443): " hysteria_port
+    read -r -p "please enterHysteriaport(default:443): " hysteria_port
     [[ -z ${hysteria_port} ]] && hysteria_port=443
-    read -r -p "请输入单客户端最大上传速度/Mbps(默认:100): " hysteria_up_mbps
+    read -r -p "Please enter the maximum upload speed of a single client/Mbps(default:100): " hysteria_up_mbps
     [[ -z "${hysteria_up_mbps}" ]] && hysteria_up_mbps=100
-    read -r -p "请输入单客户端最大下载速度/Mbps(默认:100): " hysteria_down_mbps
+    read -r -p "Please enter the maximum download speed of a single client/Mbps(default:100): " hysteria_down_mbps
     [[ -z "${hysteria_down_mbps}" ]] && hysteria_down_mbps=100
-    while read -r -p "请输入Hysteria的密码(必填): " hysteria_password; do
+    while read -r -p "please enterHysteriapassword for(required): " hysteria_password; do
       if [[ -z ${hysteria_password} ]]; then
-        echo_content red "密码不能为空"
+        echo_content red "password can not be blank"
       else
         break
       fi
@@ -922,40 +922,40 @@ EOF
         tobyxdd/hysteria -c /etc/hysteria.json server
 
     if [[ -n $(docker ps -q -f "name=^trojan-panel-hysteria-standalone$" -f "status=running") ]]; then
-      echo_content skyBlue "---> Hysteria 安装完成"
+      echo_content skyBlue "---> Hysteria The installation is complete"
       echo_content red "\n=============================================================="
-      echo_content skyBlue "Hysteria 安装成功"
-      echo_content yellow "域名: ${domain}"
-      echo_content yellow "Hysteria的端口: ${hysteria_port}"
-      echo_content yellow "Hysteria的密码: ${hysteria_password}"
-      echo_content yellow "Hysteria私钥和证书目录: ${CADDY_CERT}"
+      echo_content skyBlue "Hysteria Successful installation"
+      echo_content yellow "domain name: ${domain}"
+      echo_content yellow "Hysteriaport: ${hysteria_port}"
+      echo_content yellow "Hysteriapassword for: ${hysteria_password}"
+      echo_content yellow "HysteriaPrivate key and certificate directory: ${CADDY_CERT}"
       echo_content red "\n=============================================================="
     else
-      echo_content red "---> Hysteria 安装失败或运行异常,请尝试修复或卸载重装"
+      echo_content red "---> Hysteria Failed to install or run abnormally,Please try to repair or uninstall and reinstall"
       exit 0
     fi
   else
-    echo_content skyBlue "---> 你已经安装了Hysteria"
+    echo_content skyBlue "---> you have installedHysteria"
   fi
 }
 
-# 安装NaiveProxy(Caddy+ForwardProxy)
+# InstallNaiveProxy(Caddy+ForwardProxy)
 install_navieproxy_standalone() {
   if [[ -z $(docker ps -a -q -f "name=^trojan-panel-navieproxy-standalone$") ]]; then
-    echo_content green "---> 安装NaiveProxy(Caddy+ForwardProxy)"
+    echo_content green "---> InstallNaiveProxy(Caddy+ForwardProxy)"
 
-    read -r -p "请输入NaiveProxy的端口(默认:443): " naiveproxy_port
+    read -r -p "please enterNaiveProxyport(default:443): " naiveproxy_port
     [[ -z "${naiveproxy_port}" ]] && naiveproxy_port=443
-    while read -r -p "请输入NaiveProxy的用户名(必填): " naiveproxy_username; do
+    while read -r -p "please enterNaiveProxyusername for(required): " naiveproxy_username; do
       if [[ -z "${naiveproxy_username}" ]]; then
-        echo_content red "用户名不能为空"
+        echo_content red "Username can not be empty"
       else
         break
       fi
     done
-    while read -r -p "请输入NaiveProxy的密码(必填): " naiveproxy_pass; do
+    while read -r -p "please enterNaiveProxypassword for(required): " naiveproxy_pass; do
       if [[ -z "${naiveproxy_pass}" ]]; then
-        echo_content red "密码不能为空"
+        echo_content red "password can not be blank"
       else
         break
       fi
@@ -1066,123 +1066,123 @@ EOF
         jonssonyan/caddy-forwardproxy
 
     if [[ -n $(docker ps -q -f "name=^trojan-panel-navieproxy-standalone$" -f "status=running") ]]; then
-      echo_content skyBlue "---> NaiveProxy(Caddy+ForwardProxy) 安装完成"
+      echo_content skyBlue "---> NaiveProxy(Caddy+ForwardProxy) The installation is complete"
       echo_content red "\n=============================================================="
-      echo_content skyBlue "NaiveProxy(Caddy+ForwardProxy) 安装成功"
-      echo_content yellow "域名: ${domain}"
-      echo_content yellow "NaiveProxy的端口: ${naiveproxy_port}"
-      echo_content yellow "NaiveProxy的用户名: ${naiveproxy_username}"
-      echo_content yellow "NaiveProxy的密码: ${naiveproxy_pass}"
-      echo_content yellow "NaiveProxy私钥和证书目录: ${CADDY_CERT}"
+      echo_content skyBlue "NaiveProxy(Caddy+ForwardProxy) Successful installation"
+      echo_content yellow "domain name: ${domain}"
+      echo_content yellow "NaiveProxyport: ${naiveproxy_port}"
+      echo_content yellow "NaiveProxyusername for: ${naiveproxy_username}"
+      echo_content yellow "NaiveProxypassword for: ${naiveproxy_pass}"
+      echo_content yellow "NaiveProxyPrivate key and certificate directory: ${CADDY_CERT}"
       echo_content red "\n=============================================================="
     else
-      echo_content red "---> NaiveProxy(Caddy+ForwardProxy) 安装失败或运行异常,请尝试修复或卸载重装"
+      echo_content red "---> NaiveProxy(Caddy+ForwardProxy) Failed to install or run abnormally,Please try to repair or uninstall and reinstall"
       exit 0
     fi
   else
-    echo_content skyBlue "---> 你已经了安装了NaiveProxy(Caddy+ForwardProxy)"
+    echo_content skyBlue "---> you have installedNaiveProxy(Caddy+ForwardProxy)"
   fi
 }
 
-# 卸载Caddy TLS
+# uninstallCaddy TLS
 uninstall_caddy_tls() {
-  # 判断Caddy TLS是否安装
+  # judgmentCaddy TLSWhether to install
   if [[ -n $(docker ps -a -q -f "name=^trojan-panel-caddy$") ]]; then
-    echo_content green "---> 卸载Caddy TLS"
+    echo_content green "---> uninstallCaddy TLS"
 
     docker rm -f trojan-panel-caddy &&
       rm -rf ${CADDY_DATA}
 
-    echo_content skyBlue "---> Caddy TLS卸载完成"
+    echo_content skyBlue "---> Caddy TLSuninstall complete"
   else
-    echo_content red "---> 请先安装Caddy TLS"
+    echo_content red "---> please install firstCaddy TLS"
   fi
 }
 
 # TrojanGFW+Caddy+Web+TLS
 uninstall_trojan_gfw_standalone() {
   if [[ -n $(docker ps -a -q -f "name=^trojan-panel-trojanGFW-standalone$") ]]; then
-    echo_content green "---> 卸载TrojanGFW+Caddy+Web+TLS"
+    echo_content green "---> uninstallTrojanGFW+Caddy+Web+TLS"
 
     docker rm -f trojan-panel-trojanGFW-standalone &&
       docker rmi -f trojangfw/trojan &&
       rm -f ${TROJANGFW_STANDALONE_CONFIG}
 
-    echo_content skyBlue "---> TrojanGFW+Caddy+Web+TLS 卸载完成"
+    echo_content skyBlue "---> TrojanGFW+Caddy+Web+TLS uninstall complete"
   else
-    echo_content red "---> 请先安装TrojanGFW+Caddy+Web+TLS"
+    echo_content red "---> please install firstTrojanGFW+Caddy+Web+TLS"
   fi
 }
 
-# 卸载TrojanGO 单机版
+# uninstallTrojanGO single vision
 uninstall_trojanGO_standalone() {
   if [[ -n $(docker ps -a -q -f "name=^trojan-panel-trojanGO-standalone$") ]]; then
-    echo_content green "---> 卸载TrojanGO+Caddy+Web+TLS+Websocket"
+    echo_content green "---> uninstallTrojanGO+Caddy+Web+TLS+Websocket"
 
     docker rm -f trojan-panel-trojanGO-standalone &&
       docker rmi -f p4gefau1t/trojan-go &&
       rm -f ${TROJANGO_STANDALONE_CONFIG}
 
-    echo_content skyBlue "---> TrojanGO+Caddy+Web+TLS+Websocket 卸载完成"
+    echo_content skyBlue "---> TrojanGO+Caddy+Web+TLS+Websocket uninstall complete"
   else
-    echo_content red "---> 请先安装TrojanGO+Caddy+Web+TLS+Websocket"
+    echo_content red "---> please install firstTrojanGO+Caddy+Web+TLS+Websocket"
   fi
 }
 
-# 卸载Hysteria
+# uninstallHysteria
 uninstall_hysteria_standalone() {
   if [[ -n $(docker ps -a -q -f "name=^trojan-panel-hysteria-standalone$") ]]; then
-    echo_content green "---> 卸载Hysteria"
+    echo_content green "---> uninstallHysteria"
 
     docker rm -f trojan-panel-hysteria-standalone &&
       docker rmi -f tobyxdd/hysteria &&
       rm -f ${HYSTERIA_STANDALONE_CONFIG}
 
-    echo_content skyBlue "---> Hysteria 卸载完成"
+    echo_content skyBlue "---> Hysteria uninstall complete"
   else
-    echo_content red "---> 请先安装Hysteria"
+    echo_content red "---> please install firstHysteria"
   fi
 }
 
-# 卸载NaiveProxy(Caddy+ForwardProxy)
+# uninstallNaiveProxy(Caddy+ForwardProxy)
 uninstall_navieproxy_standalone() {
   if [[ -n $(docker ps -a -q -f "name=^trojan-panel-navieproxy-standalone$") ]]; then
-    echo_content green "---> 卸载NaiveProxy(Caddy+ForwardProxy)"
+    echo_content green "---> uninstallNaiveProxy(Caddy+ForwardProxy)"
 
     docker rm -f trojan-panel-navieproxy-standalone &&
       docker rmi -f jonssonyan/caddy-forwardproxy &&
       rm -f ${NAIVEPROXY_STANDALONE_CONFIG}
 
-    echo_content skyBlue "---> NaiveProxy(Caddy+ForwardProxy) 卸载完成"
+    echo_content skyBlue "---> NaiveProxy(Caddy+ForwardProxy) uninstall complete"
   else
-    echo_content red "---> 请先安装NaiveProxy(Caddy+ForwardProxy)"
+    echo_content red "---> please install firstNaiveProxy(Caddy+ForwardProxy)"
   fi
 }
 
-# 卸载全部Trojan Panel相关的容器
+# uninstall allTrojan Panelrelated container
 uninstall_all() {
-  echo_content green "---> 卸载全部Trojan Panel相关的容器"
+  echo_content green "---> uninstall allTrojan Panelrelated container"
 
   docker rm -f $(docker ps -a -q -f "name=^trojan-panel") &&
     rm -rf ${TP_DATA}
 
-  echo_content skyBlue "---> 卸载全部Trojan Panel相关的容器完成"
+  echo_content skyBlue "---> uninstall allTrojan PanelThe associated container completes"
 }
 
-# 故障检测
+# Fault detection
 failure_testing() {
-  echo_content green "---> 故障检测开始"
+  echo_content green "---> Troubleshooting starts"
   if [[ ! $(docker -v 2>/dev/null) ]]; then
-    echo_content red "---> Docker运行异常"
+    echo_content red "---> DockerAbnormal operation"
   else
     if [[ -n $(docker ps -a -q -f "name=^trojan-panel-caddy$") ]]; then
       if [[ -z $(docker ps -q -f "name=^trojan-panel-caddy$" -f "status=running") ]]; then
-        echo_content red "---> Caddy TLS运行异常 错误日志如下："
+        echo_content red "---> Caddy TLSAbnormal operation The error log is as follows:"
         docker logs trojan-panel-caddy
       fi
       domain=$(cat "${DOMAIN_FILE}")
       if [[ -z $(cat "${DOMAIN_FILE}") || ! -d "${CADDY_CERT}" || ! -f "${CADDY_CERT}${domain}.crt" ]]; then
-        echo_content red "---> 证书申请异常，请尝试 1.换个子域名重新搭建 2.重启服务器将重新申请证书 3.重新搭建选择自定义证书选项 日志如下："
+        echo_content red "---> The certificate application is abnormal, please try 1.Rebuild with another subdomain 2.Restarting the server will reapply for the certificate 3.Rebuild select custom certificate option The log is as follows:"
         if [[ -f ${CADDY_LOG}error.log ]]; then
           tail -n 20 ${CADDY_LOG}error.log
         else
@@ -1191,19 +1191,19 @@ failure_testing() {
       fi
     fi
     if [[ -n $(docker ps -a -q -f "name=^trojan-panel-trojanGFW-standalone$") && -z $(docker ps -q -f "name=^trojan-panel-trojanGFW-standalone$" -f "status=running") ]]; then
-      echo_content red "---> TrojanGFW运行异常"
+      echo_content red "---> TrojanGFWAbnormal operation"
     fi
     if [[ -n $(docker ps -a -q -f "name=^trojan-panel-trojanGO-standalone$") && -z $(docker ps -q -f "name=^trojan-panel-trojanGO-standalone$" -f "status=running") ]]; then
-      echo_content red "---> TrojanGO运行异常"
+      echo_content red "---> TrojanGOAbnormal operation"
     fi
     if [[ -n $(docker ps -a -q -f "name=^trojan-panel-hysteria-standalone$") && -z $(docker ps -q -f "name=^trojan-panel-hysteria-standalone$" -f "status=running") ]]; then
-      echo_content red "---> Hysteria运行异常"
+      echo_content red "---> HysteriaAbnormal operation"
     fi
     if [[ -n $(docker ps -a -q -f "name=^trojan-panel-navieproxy-standalone$") && -z $(docker ps -q -f "name=^trojan-panel-navieproxy-standalone$" -f "status=running") ]]; then
-      echo_content red "---> NaiveProxy(Caddy+ForwardProxy)运行异常"
+      echo_content red "---> NaiveProxy(Caddy+ForwardProxy)Abnormal operation"
     fi
   fi
-  echo_content green "---> 故障检测结束"
+  echo_content green "---> Troubleshooting ended"
 }
 
 main() {
@@ -1221,21 +1221,21 @@ main() {
   echo_content skyBlue "Github: https://github.com/trojanpanel"
   echo_content skyBlue "Docs: https://trojanpanel.github.io"
   echo_content red "\n=============================================================="
-  echo_content yellow "1. 安装TrojanGFW+Caddy+Web+TLS"
-  echo_content yellow "2. 安装TrojanGO+Caddy+Web+TLS+Websocket"
-  echo_content yellow "3. 安装Hysteria"
-  echo_content yellow "4. 安装NaiveProxy(Caddy+ForwardProxy)"
-  echo_content yellow "5. 安装Caddy TLS"
+  echo_content yellow "1. InstallTrojanGFW+Caddy+Web+TLS"
+  echo_content yellow "2. InstallTrojanGO+Caddy+Web+TLS+Websocket"
+  echo_content yellow "3. InstallHysteria"
+  echo_content yellow "4. InstallNaiveProxy(Caddy+ForwardProxy)"
+  echo_content yellow "5. InstallCaddy TLS"
   echo_content green "\n=============================================================="
-  echo_content yellow "6. 卸载TrojanGFW+Caddy+Web+TLS"
-  echo_content yellow "7. 卸载TrojanGO+Caddy+Web+TLS+Websocket"
-  echo_content yellow "8. 卸载Hysteria"
-  echo_content yellow "9. 卸载NaiveProxy(Caddy+ForwardProxy)"
-  echo_content yellow "10. 卸载Caddy TLS"
-  echo_content yellow "11. 卸载全部Trojan Panel相关的应用"
+  echo_content yellow "6. uninstallTrojanGFW+Caddy+Web+TLS"
+  echo_content yellow "7. uninstallTrojanGO+Caddy+Web+TLS+Websocket"
+  echo_content yellow "8. uninstallHysteria"
+  echo_content yellow "9. uninstallNaiveProxy(Caddy+ForwardProxy)"
+  echo_content yellow "10. uninstallCaddy TLS"
+  echo_content yellow "11. uninstall allTrojan Panelrelated applications"
   echo_content green "\n=============================================================="
-  echo_content yellow "12. 故障检测"
-  read -r -p "请选择:" selectInstall_type
+  echo_content yellow "12. Fault detection"
+  read -r -p "please choose:" selectInstall_type
   case ${selectInstall_type} in
   1)
     install_docker
@@ -1283,7 +1283,7 @@ main() {
     failure_testing
     ;;
   *)
-    echo_content red "没有这个选项"
+    echo_content red "no such option"
     ;;
   esac
 }
