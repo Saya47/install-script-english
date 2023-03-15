@@ -15,13 +15,13 @@ memory requirements: ≥1G
 1. Online version (recommended)
 
 ```shell
-source <(curl -L https://github.com/Saya47/install-script-english/raw/main/install_script.sh)
+bash <(curl -L https://github.com/Saya47/install-script-english/raw/main/install_script.sh)
 ```
 
 2. single vision
 
 ```shell
-source <(curl -L https://github.com/Saya47/install-script-english/raw/main/install_script_standalone.sh)
+bash <(curl -L https://github.com/Saya47/install-script-english/raw/main/install_script_standalone.sh)
 ```
 
 3. [install old version](./archive)
